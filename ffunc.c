@@ -31,7 +31,7 @@
 #define _FFUNC_WORKER_ " ffunc-worker"
 
 static void* mem_align(size_t size);
-static int ffunc_get_number_of_digit(long long number);
+static int __attribute__ ((unused)) ffunc_get_number_of_digit(long long number);
 static ffunc_pool* ffunc_recreate_pool(ffunc_pool *curr_p, size_t new_size);
 static ffunc_str_t ffunc_proc_name;
 
@@ -72,7 +72,7 @@ void(*_ffunc_direct_consume)(ffunc_session_t *);
 static int
 ffunc_init(char** ffunc_nmap_func) {
     int f = 0;
-    size_t szof_func_name;
+    //size_t szof_func_name;
     usr_req_handle = NULL;
     char *error;
     usr_req_handle = dlopen(NULL, RTLD_LAZY | RTLD_NOW);
@@ -204,7 +204,7 @@ ffunc_read_body_limit(ffunc_session_t * csession, ffunc_str_t *content) {
     FCGX_Request *request = csession->request;
     char* clenstr = _get_param_("CONTENT_LENGTH");
     FCGX_Stream *in = request->in;
-    size_t len;
+    size_t len = 0;
 
     if (clenstr) {
         // long int strtol (const char* str, char** endptr, int base);
@@ -424,6 +424,7 @@ hook_socket(int sock_port, int backlog, int max_thread, char** ffunc_nmap_func, 
 
 static void
 ffunc_signal_backtrace(int sfd) {
+    (void) sfd;
     size_t i, ptr_size;
     void *buffer[10];
     char **strings;
@@ -464,8 +465,8 @@ ffunc_add_signal_handler() {
 int
 main(int argc, char *argv[]) {
     ffunc_config_t *conf;
-    char **new_argv, *env_ffunc_master;
-    unsigned int i;
+    char **new_argv; //, *env_ffunc_master;
+    int i;
     int status;
 
     if (FFUNC_GETENV(_FFUNC_MASTER_ENV)) {
