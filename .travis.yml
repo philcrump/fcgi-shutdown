@@ -1,0 +1,19 @@
+## Travis CI Configuration file
+
+# Use barebones Travis image
+language: c
+
+# Install dependencies
+before_install:
+  - sudo apt-get install -y libfcgi-dev
+addons:
+  apt:
+    update: true
+
+# Only grab latest git commit (no need for history)
+git:
+  depth: 1
+
+# Command to run tests
+script:
+  - make

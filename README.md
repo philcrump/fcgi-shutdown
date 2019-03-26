@@ -1,4 +1,4 @@
-fcgi-shutdown
+fcgi-shutdown  [![Build Status](https://travis-ci.org/philcrump/fcgi-shutdown.svg?branch=master)](https://travis-ci.org/philcrump/fcgi-shutdown)
 ==========
 Simple FastCGI application to issue shutdown command (and potentially perform other tasks in the future).
 
