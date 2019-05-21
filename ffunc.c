@@ -31,7 +31,7 @@
 #define _FFUNC_WORKER_ " ffunc-worker"
 
 static void* mem_align(size_t size);
-static int ffunc_get_number_of_digit(long long number);
+static int __attribute__ ((unused)) ffunc_get_number_of_digit(long long number);
 static ffunc_pool* ffunc_recreate_pool(ffunc_pool *curr_p, size_t new_size);
 static ffunc_str_t ffunc_proc_name;
 
@@ -72,7 +72,7 @@ void(*_ffunc_direct_consume)(ffunc_session_t *);
 static int
 ffunc_init(char** ffunc_nmap_func) {
     int f = 0;
-    size_t szof_func_name;
+    //size_t szof_func_name;
     usr_req_handle = NULL;
     char *error;
     usr_req_handle = dlopen(NULL, RTLD_LAZY | RTLD_NOW);
@@ -204,7 +204,7 @@ ffunc_read_body_limit(ffunc_session_t * csession, ffunc_str_t *content) {
     FCGX_Request *request = csession->request;
     char* clenstr = _get_param_("CONTENT_LENGTH");
     FCGX_Stream *in = request->in;
-    size_t len;
+    size_t len = 0;
 
     if (clenstr) {
         // long int strtol (const char* str, char** endptr, int base);
@@ -248,6 +248,7 @@ ffunc_hook(ffunc_config_t *conf) {
     int max_thread = conf->max_thread;
     char** ffunc_nmap_func = conf->ffunc_nmap_func;
     size_t max_read_buffer = conf->max_read_buffer;
+    int len;
 
     if (max_read_buffer > 0) {
         max_std_input_buffer = max_read_buffer;
@@ -307,7 +308,11 @@ FFUNC_WORKER_RESTART:
     if (!has_init_signal) {
         ffunc_add_signal_handler();
     }
-    write(procpip[1], FFUNC_APP_INITIALIZING, FFUNC_APP_INIT_PIPE_BUF_SIZE);
+    len = write(procpip[1], FFUNC_APP_INITIALIZING, FFUNC_APP_INIT_PIPE_BUF_SIZE);
+    if(len == FFUNC_APP_INIT_PIPE_BUF_SIZE)
+    {
+        ffunc_print("%s%d/%lu\n", "Warning: Short write: ", len, FFUNC_APP_INIT_PIPE_BUF_SIZE);
+    }
     child_pid = fork();
     if (child_pid >= 0) {// fork was successful
         if (child_pid == 0) {// child process
@@ -373,6 +378,7 @@ ffunc_thread_worker(void* wrker) {
 
 static int
 hook_socket(int sock_port, char *sock_port_str, int backlog, int max_thread, char** ffunc_nmap_func, int* procpip) {
+    int len;
     char pipbuf[FFUNC_APP_INIT_PIPE_BUF_SIZE];
     FCGX_Init();
     if (!ffunc_init(ffunc_nmap_func)) {
@@ -412,8 +418,16 @@ hook_socket(int sock_port, char *sock_port_str, int backlog, int max_thread, cha
     ffunc_print("%d threads \n", max_thread);
 
     /** Release for success initialized **/
-    read(procpip[0], pipbuf, FFUNC_APP_INIT_PIPE_BUF_SIZE);
-    write(procpip[1], FFUNC_APP_INITIALIZED, FFUNC_APP_INIT_PIPE_BUF_SIZE);
+    len = read(procpip[0], pipbuf, FFUNC_APP_INIT_PIPE_BUF_SIZE);
+    if(len == FFUNC_APP_INIT_PIPE_BUF_SIZE)
+    {
+        ffunc_print("%s%d/%lu\n", "Warning: Short read: ", len, FFUNC_APP_INIT_PIPE_BUF_SIZE);
+    }
+    len = write(procpip[1], FFUNC_APP_INITIALIZED, FFUNC_APP_INIT_PIPE_BUF_SIZE);
+    if(len == FFUNC_APP_INIT_PIPE_BUF_SIZE)
+    {
+        ffunc_print("%s%d/%lu\n", "Warning: Short write: ", len, FFUNC_APP_INIT_PIPE_BUF_SIZE);
+    }
     close(procpip[0]);
     close(procpip[1]);
 
@@ -432,6 +446,7 @@ hook_socket(int sock_port, char *sock_port_str, int backlog, int max_thread, cha
 
 static void
 ffunc_signal_backtrace(int sfd) {
+    (void)sfd;
     size_t i, ptr_size;
     void *buffer[10];
     char **strings;
@@ -472,8 +487,8 @@ ffunc_add_signal_handler() {
 int
 main(int argc, char *argv[]) {
     ffunc_config_t *conf;
-    char **new_argv, *env_ffunc_master;
-    unsigned int i;
+    char **new_argv; //, *env_ffunc_master;
+    int i;
     int status;
 
     if (FFUNC_GETENV(_FFUNC_MASTER_ENV)) {
