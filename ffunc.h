@@ -51,6 +51,7 @@ extern "C" {
 
 	typedef struct {
 		int sock_port;
+		char* sock_port_str;
 		int backlog;
 		int max_thread;
 		char** ffunc_nmap_func;
@@ -59,6 +60,10 @@ extern "C" {
 #if defined __GNUC__ || defined __CYGWIN__ || defined __MINGW32__ || defined __APPLE__
 		void(*app_init_handler)(void);
 		int daemon;
+#else
+#if defined _WIN32 || _WIN64 /*Windows*/
+		char* app_init_handler_name;
+#endif
 #endif
 
 		/* DO NOT USE THE VARIABLE BELOW */
@@ -100,9 +105,11 @@ char *x =(char*) malloc(len); \
 #define ffunc_write_http_not_found_status(_csession) ffunc_write_out(_csession, "Status: 404 Not Found\r\n")
 #define ffunc_write_http_internal_error_status(_csession) ffunc_write_out(_csession, "Status: 500 Internal Server Error\r\n")
 #define ffunc_write_http_no_content_status(_csession) ffunc_write_out(_csession, "Status: 204 No Content\r\n")
-#define ffunc_write_default_header(_csession) ffunc_write_out(_csession, "Content-Type: application/x-www-form-urlencoded\r\n\r\n")
+#define ffunc_write_textplain_header(_csession) ffunc_write_out(_csession, "Content-Type: text/plain\r\n\r\n")
+#define ffunc_write_default_header(_csession) ffunc_write_out(_csession, "Content-Type: text/plain\r\n\r\n")
 #define ffunc_write_jsonp_header(_csession) ffunc_write_out(_csession, "Content-Type: application/javascript\r\n\r\n")
 #define ffunc_write_json_header(_csession) ffunc_write_out(_csession, "Content-Type: application/json\r\n\r\n")
+#define ffunc_write_xwwwformurlenc_header(_csession) ffunc_write_out(_csession, "Content-Type: application/x-www-form-urlencoded\r\n\r\n")
 
 #ifdef __cplusplus
 }
