@@ -309,7 +309,7 @@ FFUNC_WORKER_RESTART:
         ffunc_add_signal_handler();
     }
     len = write(procpip[1], FFUNC_APP_INITIALIZING, FFUNC_APP_INIT_PIPE_BUF_SIZE);
-    if(len == FFUNC_APP_INIT_PIPE_BUF_SIZE)
+    if(len < (int)FFUNC_APP_INIT_PIPE_BUF_SIZE)
     {
         ffunc_print("%s%d/%lu\n", "Warning: Short write: ", len, FFUNC_APP_INIT_PIPE_BUF_SIZE);
     }
@@ -419,12 +419,12 @@ hook_socket(int sock_port, char *sock_port_str, int backlog, int max_thread, cha
 
     /** Release for success initialized **/
     len = read(procpip[0], pipbuf, FFUNC_APP_INIT_PIPE_BUF_SIZE);
-    if(len == FFUNC_APP_INIT_PIPE_BUF_SIZE)
+    if(len < (int)FFUNC_APP_INIT_PIPE_BUF_SIZE)
     {
         ffunc_print("%s%d/%lu\n", "Warning: Short read: ", len, FFUNC_APP_INIT_PIPE_BUF_SIZE);
     }
     len = write(procpip[1], FFUNC_APP_INITIALIZED, FFUNC_APP_INIT_PIPE_BUF_SIZE);
-    if(len == FFUNC_APP_INIT_PIPE_BUF_SIZE)
+    if(len < (int)FFUNC_APP_INIT_PIPE_BUF_SIZE)
     {
         ffunc_print("%s%d/%lu\n", "Warning: Short write: ", len, FFUNC_APP_INIT_PIPE_BUF_SIZE);
     }
